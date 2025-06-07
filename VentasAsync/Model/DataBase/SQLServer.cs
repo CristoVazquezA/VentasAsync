@@ -55,7 +55,57 @@ namespace VentasAsync.Model.DataBase
             }
         }
 
+        public async Task<T> ScalarAsync<T>(string query, SqlParameter[] parametros = null)
+        {
+            // Implementación del método ScalarAsync
+            // Aquí se debe realizar la conexión a la base de datos y ejecutar el comando SQL
+            // utilizando ExecuteScalar para obtener un valor único.
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.CommandType = CommandType.Text;
+                    if (parametros != null)
+                    {
+                        cmd.Parameters.AddRange(parametros);
+                    }
+                    await con.OpenAsync();
+                    object result = await cmd.ExecuteScalarAsync();
+                    return result != null ? (T)Convert.ChangeType(result, typeof(T)) : default;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+        public async Task<T> NonQueryAsync<T>(string query, SqlParameter[] parametros = null)
+        {
+            // Implementación del método NonQueryAsync
+            // Aquí se debe realizar la conexión a la base de datos y ejecutar el comando SQL
+            // utilizando ExecuteNonQuery para realizar operaciones que no devuelven resultados.
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.CommandType = CommandType.Text;
+                    if (parametros != null)
+                    {
+                        cmd.Parameters.AddRange(parametros);
+                    }
+                    await con.OpenAsync();
+                    object result = await cmd.ExecuteNonQueryAsync();
+                    return result != null ? (T)Convert.ChangeType(result, typeof(T)) : default;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
 
