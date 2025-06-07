@@ -5,15 +5,11 @@ namespace VentasAsync
 {
     public partial class Form1 : Form
     {
-        private readonly string _connectionString;
         public Form1()
         {
             InitializeComponent();
             // Inicializamos la cadena de conexión a la base de datos
-            _connectionString = "Server=localhost;" +
-                "Database=VentasDB;" +
-                "Trusted_Connection=True;" +
-                "TrustServerCertificate=True";
+   
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -21,7 +17,7 @@ namespace VentasAsync
             try
             {
                 Cliente cliente = new Cliente();
-                ClienteCommands clienteCommands = new ClienteCommands(_connectionString);
+                ClienteCommands clienteCommands = new ClienteCommands();
 
                 // Asignamos el ID del cliente que queremos buscar
                 int clienteId = 1; // Por ejemplo, buscamos el cliente con ID 1

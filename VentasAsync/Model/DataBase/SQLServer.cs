@@ -7,9 +7,10 @@ namespace VentasAsync.Model.DataBase
     internal class SQLServer
     {
         private readonly string _connectionString;
-        public SQLServer(string connectionString)
+        public SQLServer()
         {
-            _connectionString = connectionString;
+            SQLServerConfiguration.GetConnectionString();
+            _connectionString = SQLServerConfiguration.ConnectionString;
         }
 
         public async Task<T> ScalarAsync<T>(string query, SqlParameter[] parameters = null)

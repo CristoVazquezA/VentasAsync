@@ -6,12 +6,6 @@ namespace VentasAsync.Model.Commands
 {
     internal class ClienteCommands
     {
-        private readonly string _connectionString;
-        public ClienteCommands(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
-
         public async Task<Cliente> GetClienteAsync(int id)
         {
             try
@@ -23,7 +17,7 @@ namespace VentasAsync.Model.Commands
                 };
 
                 // Utilizamos la clase SQLServer para ejecutar la consulta y obtener el resultado
-                SQLServer sqlServer = new SQLServer(_connectionString);
+                SQLServer sqlServer = new SQLServer();
                 return await sqlServer.ReaderAsync<Cliente>(query, parametros);
             }
             catch (Exception)
