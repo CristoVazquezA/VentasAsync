@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Reflection;
 
 namespace VentasAsync.Model.DataBase
 {
@@ -11,100 +12,136 @@ namespace VentasAsync.Model.DataBase
             _connectionString = connectionString;
         }
 
-        public async Task<T> ReaderAsync<T>(string query, SqlParameter[] parametros = null) where T : class, new()
+        public async Task<T> ScalarAsync<T>(string query, SqlParameter[] parameters = null)
         {
-            // Implementación del método ReaderAsync
-            // Aquí se debe realizar la conexión a la base de datos y ejecutar el comando SQL
-            // utilizando SqlDataReader para leer los resultados y mapearlos a la entidad T.
-
-            try
+            await using SqlConnection sqlConnection = new(_connectionString);
+            await using SqlCommand sqlCommand = new(query, sqlConnection)
             {
-                using (SqlConnection con = new SqlConnection(_connectionString))
-                {
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.CommandType = CommandType.Text;
+                CommandType = CommandType.Text
+            };
 
-                    if (parametros != null)
-                    {
-                        cmd.Parameters.AddRange(parametros);
-                    }
-
-                    await con.OpenAsync();
-
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    if(await reader.ReadAsync())
-                    {
-                        T result = new T();
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            var property = typeof(T).GetProperty(reader.GetName(i));
-                            if (property != null && !reader.IsDBNull(i))
-                            {
-                                property.SetValue(result, reader.GetValue(i));
-                            }
-                        }
-                        return result;
-                    }
-                }
-                return null; // Si no se encontró ningún resultado, retornamos null
+            if (parameters is not null)
+            {
+                sqlCommand.Parameters.AddRange(parameters);
             }
-            catch (Exception)
+
+            await sqlConnection.OpenAsync();
+            object result = await sqlCommand.ExecuteScalarAsync();
+
+            return result is T value ? value : default;
+
+        }
+        public async Task NonQueryAsync(string query, SqlParameter[] parameters = null)
+        {
+
+            await using SqlConnection sqlConnection = new(_connectionString);
+            await using SqlCommand sqlCommand = new(query, sqlConnection)
             {
-                throw;
+                CommandType = CommandType.Text
+            };
+
+            if (parameters is not null)
+            {
+                sqlCommand.Parameters.AddRange(parameters);
+            }
+
+            await sqlConnection.OpenAsync();
+
+            int registrosAfectados = await sqlCommand.ExecuteNonQueryAsync();
+
+            if (registrosAfectados == 0)
+            {
+                throw new Exception("No se afectaron registros.");
             }
         }
-
-        public async Task<T> ScalarAsync<T>(string query, SqlParameter[] parametros = null)
+        public async Task<T> ReaderAsync<T>(string query, SqlParameter[] parameters = null)
+            where T : class, new()
         {
-            // Implementación del método ScalarAsync
-            // Aquí se debe realizar la conexión a la base de datos y ejecutar el comando SQL
-            // utilizando ExecuteScalar para obtener un valor único.
-            try
+            await using SqlConnection sqlConnection = new(_connectionString);
+            await using SqlCommand sqlCommand = new(query, sqlConnection)
             {
-                using (SqlConnection con = new SqlConnection(_connectionString))
+                CommandType = CommandType.Text
+            };
+
+            if (parameters is not null)
+            {
+                sqlCommand.Parameters.AddRange(parameters);
+            }
+
+            await sqlConnection.OpenAsync();
+            await using SqlDataReader reader = await sqlCommand.ExecuteReaderAsync();
+
+            var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            if (await reader.ReadAsync())
+            {
+                T item = new();
+
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.CommandType = CommandType.Text;
-                    if (parametros != null)
+                    string columnName = reader.GetName(i);
+
+                    var property = props.FirstOrDefault(p =>
+                        string.Equals(p.Name, columnName, StringComparison.OrdinalIgnoreCase));
+
+                    if (property != null && !reader.IsDBNull(i))
                     {
-                        cmd.Parameters.AddRange(parametros);
+                        object value = reader.GetValue(i);
+                        object converted = Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                        property.SetValue(item, converted);
                     }
-                    await con.OpenAsync();
-                    object result = await cmd.ExecuteScalarAsync();
-                    return result != null ? (T)Convert.ChangeType(result, typeof(T)) : default;
                 }
+
+                return item;
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return null;
         }
-
-        public async Task<T> NonQueryAsync<T>(string query, SqlParameter[] parametros = null)
+        public async Task<List<T>> ReaderListAsync<T>(string query, SqlParameter[] parameters = null)
+            where T : class, new()
         {
-            // Implementación del método NonQueryAsync
-            // Aquí se debe realizar la conexión a la base de datos y ejecutar el comando SQL
-            // utilizando ExecuteNonQuery para realizar operaciones que no devuelven resultados.
-            try
+
+            await using SqlConnection sqlConnection = new(_connectionString);
+            await using SqlCommand sqlCommand = new(query, sqlConnection)
             {
-                using (SqlConnection con = new SqlConnection(_connectionString))
+                CommandType = CommandType.Text
+            };
+
+            if (parameters is not null)
+            {
+                sqlCommand.Parameters.AddRange(parameters);
+            }
+
+            await sqlConnection.OpenAsync();
+            await using SqlDataReader reader = await sqlCommand.ExecuteReaderAsync();
+
+            var lista = new List<T>();
+            var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            while (await reader.ReadAsync())
+            {
+                T item = new();
+
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.CommandType = CommandType.Text;
-                    if (parametros != null)
+                    string columnName = reader.GetName(i);
+
+                    var property = props.FirstOrDefault(p =>
+                        string.Equals(p.Name, columnName, StringComparison.OrdinalIgnoreCase));
+
+                    if (property != null && !reader.IsDBNull(i))
                     {
-                        cmd.Parameters.AddRange(parametros);
+                        object value = reader.GetValue(i);
+                        object converted = Convert.
+                            ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                        property.SetValue(item, converted);
                     }
-                    await con.OpenAsync();
-                    object result = await cmd.ExecuteNonQueryAsync();
-                    return result != null ? (T)Convert.ChangeType(result, typeof(T)) : default;
                 }
+
+                lista.Add(item);
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return lista;
         }
     }
 }
