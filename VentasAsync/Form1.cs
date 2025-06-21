@@ -7,6 +7,7 @@ namespace VentasAsync
 {
     public partial class Form1 : Form
     {
+
         private readonly ClienteCommands _clienteCommands;
         public Form1()
         {
@@ -98,7 +99,7 @@ namespace VentasAsync
             {
                 // Asignamos el ID del cliente que queremos añadir
                 int clienteId = 2; // Por ejemplo, añadimos un cliente con ID 2
-                cliente = await clienteCommands.AddClienteAsync(clienteId);
+                cliente = await clienteCommands.AddClienteAsync();
                 if (cliente == null)
                 {
                     MessageBox.Show("No se pudo añadir el cliente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
