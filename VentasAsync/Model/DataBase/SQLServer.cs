@@ -12,7 +12,6 @@ namespace VentasAsync.Model.DataBase
             SQLServerConfiguration.GetConnectionString();
             _connectionString = SQLServerConfiguration.ConnectionString;
         }
-
         public SqlConnection GetConnection()
         {
             SqlConnection sqlConnection = new(_connectionString);
