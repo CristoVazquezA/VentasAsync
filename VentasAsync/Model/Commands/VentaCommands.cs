@@ -11,7 +11,7 @@ namespace VentasAsync.Model.Commands
 {
     internal class VentaCommands
     {
-        public async Task<Venta> GetVentaAsync(int id)
+        public async Task<Venta> GetVentaAsync(int id, bool incluirConceptos = false)
         {
             try
             {
@@ -23,7 +23,14 @@ namespace VentasAsync.Model.Commands
 
                 // Utilizamos la clase SQLServer para ejecutar la consulta y obtener el resultado
                 SQLServer sqlServer = new SQLServer();
-                return await sqlServer.ReaderAsync<Venta>(query, parametros);
+                var venta = await sqlServer.ReaderAsync<Venta>(query, parametros);
+                if (venta != null && incluirConceptos)
+                {
+                    // Obtenemos los detalles de la venta
+                    VentaDetalleCommands detalleCommands = new VentaDetalleCommands();
+                    venta.Conceptos = await detalleCommands.GetVentasDetalleAsync(venta.Id);
+                }
+                return venta;
             }
             catch (Exception)
             {
@@ -48,7 +55,7 @@ namespace VentasAsync.Model.Commands
             }
 
         }
-        public async Task<int> AddVentaAsync(Venta venta)
+        private async Task<int> AddVentaAsync(Venta venta)
         {
             try
             {
@@ -71,7 +78,24 @@ namespace VentasAsync.Model.Commands
                 throw;
             }
         }
+        public async Task SaveVentaAsync(Venta venta) 
+        {
+            try
+            {
+                int ventaId = await AddVentaAsync(venta);
 
+                foreach(var concepto in venta.Conceptos)
+                {
+                    VentaDetalleCommands detalleCommands = new VentaDetalleCommands();
+                    await detalleCommands.AddVentaDetalleAsync(concepto, ventaId);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public async Task<Venta> UpdateVentaAsync(int id)
         {
             try
@@ -95,7 +119,6 @@ namespace VentasAsync.Model.Commands
                 throw;
             }
         }
-
         public async Task<Venta> DeleteVentaAsync(int id)
         {
             try

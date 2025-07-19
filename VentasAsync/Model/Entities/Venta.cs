@@ -13,5 +13,6 @@ namespace VentasAsync.Model.Entities
         public int Folio { get; set; }
         public double Total { get; set; }
         public int ClienteID { get; set; }
+        public List<VentaDetalle> Conceptos { get; set; } = new List<VentaDetalle>();
     }
 }
