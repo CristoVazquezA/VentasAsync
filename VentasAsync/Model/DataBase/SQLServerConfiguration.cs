@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VentasAsync.Model.DataBase
+﻿namespace VentasAsync.Model.DataBase
 {
     internal static class SQLServerConfiguration
     {
         private static string _connectionString;
-        public static string ConnectionString { 
-            get 
-            { 
-                return _connectionString; 
-            } 
+        public static string ConnectionString
+        {
+            get
+            {
+                return _connectionString;
+            }
         }
 
         public static void GetConnectionString()

@@ -1,9 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VentasAsync.Model.DataBase;
 using VentasAsync.Model.Entities;
 
@@ -36,7 +31,7 @@ namespace VentasAsync.Model.Commands
         {
             try
             {
-                string query = "INSERT INTO VentasDetalle " +
+                string query = "INSERT INTO VentaDetalle " +
                     "(VentaId, Renglon, ProductoId, Cantidad, ValorUnitario, Descripcion, Importe) " +
                                "VALUES " +
                     "(@VentaId, @Renglon, @ProductoId, @Cantidad, @ValorUnitario, @Descripcion, @Importe);";

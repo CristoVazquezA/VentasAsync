@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using VentasAsync.Model.DataBase;
 using VentasAsync.Model.Entities;
 
@@ -60,11 +55,10 @@ namespace VentasAsync.Model.Commands
             try
             {
                 string query = "INSERT INTO Ventas (Fecha, Folio, Total, ClienteId) " +
-                               "VALUES (@Fecha, @Folio, @Total, @ClienteId); " +
-                               "SELECT SCOPE_IDENTITY();";
+                               "VALUES (GetDate(), @Folio, @Total, @ClienteId); " +
+                               "SELECT CAST (SCOPE_IDENTITY() AS INT);";
                 SqlParameter[] parametros = new SqlParameter[]
                 {
-                    new SqlParameter("@Fecha", venta.Fecha),
                     new SqlParameter("@Folio", venta.Folio),
                     new SqlParameter("@Total", venta.Total),
                     new SqlParameter("@ClienteId", venta.ClienteID)
@@ -78,13 +72,13 @@ namespace VentasAsync.Model.Commands
                 throw;
             }
         }
-        public async Task SaveVentaAsync(Venta venta) 
+        public async Task SaveVentaAsync(Venta venta)
         {
             try
             {
                 int ventaId = await AddVentaAsync(venta);
 
-                foreach(var concepto in venta.Conceptos)
+                foreach (var concepto in venta.Conceptos)
                 {
                     VentaDetalleCommands detalleCommands = new VentaDetalleCommands();
                     await detalleCommands.AddVentaDetalleAsync(concepto, ventaId);

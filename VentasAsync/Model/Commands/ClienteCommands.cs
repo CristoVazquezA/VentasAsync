@@ -6,7 +6,7 @@ namespace VentasAsync.Model.Commands
 {
     internal class ClienteCommands
     {
-        
+
         public async Task<Cliente> GetClienteAsync(int id)
         {
             try

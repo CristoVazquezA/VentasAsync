@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VentasAsync.Model.Entities
+﻿namespace VentasAsync.Model.Entities
 {
     internal class Producto
     {

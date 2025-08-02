@@ -1,9 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VentasAsync.Model.DataBase;
 using VentasAsync.Model.Entities;
 
@@ -13,9 +8,9 @@ namespace VentasAsync.Model.Commands
     {
         public async Task<Producto> GetProductoAsync(int id)
         {
-			try
-			{
-				string query = "SELECT * FROM Productos Where Id = @Id";
+            try
+            {
+                string query = "SELECT * FROM Productos Where Id = @Id";
                 SqlParameter[] parametros = new SqlParameter[]
 {
                     new SqlParameter("@Id", id)
@@ -26,11 +21,11 @@ namespace VentasAsync.Model.Commands
                 return await sqlServer.ReaderAsync<Producto>(query, parametros);
 
             }
-			catch (Exception)
-			{
+            catch (Exception)
+            {
 
-				throw;
-			}
+                throw;
+            }
         }
 
         public async Task<List<Producto>> GetProductosAsync()
@@ -50,7 +45,7 @@ namespace VentasAsync.Model.Commands
             }
         }
 
-        public async Task<int> AddProductoAsync (Producto producto)
+        public async Task<int> AddProductoAsync(Producto producto)
         {
             try
             {

@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using VentasAsync.Model.Commands;
+﻿using VentasAsync.Model.Commands;
 using VentasAsync.Model.Entities;
 
 namespace VentasAsync
@@ -15,132 +6,53 @@ namespace VentasAsync
     public partial class FrmVentas : Form
     {
         private readonly VentaCommands _ventaCommands;
-
+        private Venta ventaDemo;
         public FrmVentas()
         {
             InitializeComponent();
             _ventaCommands = new VentaCommands();
-            CargarGridVentas();
+
+            VentaDetalle concepto1 = new VentaDetalle
+            {
+                Renglon = 1,
+                ProductoId = 2,
+                Cantidad = 1,
+                ValorUnitario = 50.00,
+                Descripcion = "papitas",
+                Importe = 50.00,
+            };
+
+            VentaDetalle concepto2 = new VentaDetalle
+            {
+                Renglon = 2,
+                ProductoId = 1,
+                Cantidad = 2,
+                ValorUnitario = 20.00,
+                Descripcion = "soda",
+                Importe = 40.00,
+            };
+
+            List<VentaDetalle> conceptos = new List<VentaDetalle>
+            {
+                concepto1,
+                concepto2
+            };
+
+            ventaDemo = new Venta
+            {
+                ClienteID = 1,
+                Folio = DateTime.Now.Second,
+                Total = 90.00,
+                Conceptos = conceptos,
+            };
         }
 
-        private async void CargarGridVentas()
+        private async void BtnGuardarVenta_Click(object sender, EventArgs e)
         {
             try
             {
-                DgvVentas.DataSource = await _ventaCommands.GetVentasAsync();
-            }
-            catch (Exception ex)
-            {
+                await _ventaCommands.SaveVentaAsync(ventaDemo);
 
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private async void BtnBuscarVenta_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Venta venta = new Venta();
-                VentaCommands ventaCommands = new VentaCommands();
-
-                // Asignamos el ID del cliente que queremos buscar
-                int ventaId = 1; // Por ejemplo, buscamos el cliente con ID 1
-
-                venta = await ventaCommands.GetVentaAsync(ventaId);
-
-                if (venta == null)
-                {
-                    MessageBox.Show("venta no encontrada.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                MessageBox.Show($"Fecha: {venta.Fecha}\n" +
-                                $"Folio: {venta.Folio}\n" +
-                                $"Total: {venta.Total}\n" +
-                                $"Cliente: {venta.ClienteID}",
-                                "Información de la venta",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private async void BtnAnadirventa_Click(object sender, EventArgs e)
-        {
-            Venta venta = new Venta();
-            ProductoCommands ProductoCommands = new ProductoCommands();
-
-            try
-            {
-                // Asignamos el ID del cliente que queremos añadir
-                int VentaId = 2; // Por ejemplo, añadimos un cliente con ID 2
-                venta = await VentaCommands.AddVentaAsync();
-                if (venta == null)
-                {
-                    MessageBox.Show("No se pudo añadir la venta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                MessageBox.Show($"Venta realizada:\n" +
-                                $"Fecha: {venta.Fecha}\n" +
-                                $"Folio: {venta.Folio}\n" +
-                                $"Total: {venta.Total}\n" +
-                                $"ClienteId: {venta.ClienteID}",
-                                "Venta realizada",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private async void BtnActualizarVenta_Click(object sender, EventArgs e)
-        {
-            Venta venta = new Venta();
-            VentaCommands ventaCommands = new VentaCommands();
-            try
-            {
-                // Asignamos el ID del cliente que queremos actualizar
-                int ventaId = 1; // Por ejemplo, actualizamos el cliente con ID 1
-                venta = await ventaCommands.UpdateVentaAsync(ventaId);
-                if (venta == null)
-                {
-                    MessageBox.Show("No se pudo actualizar la venta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                MessageBox.Show($"Venta actualizada:\n" +
-                                $"Fecha: {venta.Fecha}\n" +
-                                $"Folio: {venta.Folio}\n" +
-                                $"Total:  {venta.Total}\n" +
-                                $"ClienteId: {venta.ClienteID}",
-                                "Venta actualizada",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private async void BtnEliminarVenta_Click(object sender, EventArgs e)
-        {
-            Venta venta = new Venta();
-            VentaCommands ventaCommands = new VentaCommands();
-            try
-            {
-                // Asignamos el ID del cliente que queremos eliminar
-                int ventaId = 1; // Por ejemplo, eliminamos el cliente con ID 1
-                venta = await ventaCommands.DeleteVentaAsync(ventaId);
-                MessageBox.Show($"Venta con ID {ventaId} eliminado correctamente.",
-                                "Venta Eliminada",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
