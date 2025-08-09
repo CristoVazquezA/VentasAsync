@@ -52,11 +52,26 @@ namespace VentasAsync
             try
             {
                 await _ventaCommands.SaveVentaAsync(ventaDemo);
+                MessageBox.Show("Venta Guardada Correctamente");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private async void BtnGuardarVentaTransaction_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                await _ventaCommands.SaveVentaTransactionAsync(ventaDemo);
+                MessageBox.Show("Venta Guardada Correctamente");
 
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+
             }
         }
     }

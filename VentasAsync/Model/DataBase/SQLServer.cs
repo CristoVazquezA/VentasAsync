@@ -61,7 +61,6 @@ namespace VentasAsync.Model.DataBase
                 sqlCommand.Parameters.AddRange(parameters);
             }
 
-            await sqlConnection.OpenAsync();
             object result = await sqlCommand.ExecuteScalarAsync();
 
             return result is T value ? value : default;
@@ -105,7 +104,6 @@ namespace VentasAsync.Model.DataBase
                 sqlCommand.Parameters.AddRange(parameters);
             }
 
-            await sqlConnection.OpenAsync();
 
             int registrosAfectados = await sqlCommand.ExecuteNonQueryAsync();
 
@@ -173,7 +171,6 @@ namespace VentasAsync.Model.DataBase
                 sqlCommand.Parameters.AddRange(parameters);
             }
 
-            await sqlConnection.OpenAsync();
             await using SqlDataReader reader = await sqlCommand.ExecuteReaderAsync();
 
             var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -264,7 +261,6 @@ namespace VentasAsync.Model.DataBase
                 sqlCommand.Parameters.AddRange(parameters);
             }
 
-            await sqlConnection.OpenAsync();
             await using SqlDataReader reader = await sqlCommand.ExecuteReaderAsync();
 
             var lista = new List<T>();

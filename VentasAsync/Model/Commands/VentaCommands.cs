@@ -6,6 +6,11 @@ namespace VentasAsync.Model.Commands
 {
     internal class VentaCommands
     {
+        private readonly SQLServer _sqlServer;
+        public VentaCommands()
+        {
+            _sqlServer = new SQLServer();
+        }
         public async Task<Venta> GetVentaAsync(int id, bool incluirConceptos = false)
         {
             try
@@ -17,8 +22,7 @@ namespace VentasAsync.Model.Commands
                 };
 
                 // Utilizamos la clase SQLServer para ejecutar la consulta y obtener el resultado
-                SQLServer sqlServer = new SQLServer();
-                var venta = await sqlServer.ReaderAsync<Venta>(query, parametros);
+                var venta = await _sqlServer.ReaderAsync<Venta>(query, parametros);
                 if (venta != null && incluirConceptos)
                 {
                     // Obtenemos los detalles de la venta
@@ -39,8 +43,7 @@ namespace VentasAsync.Model.Commands
             {
                 string query = "SELECT * FROM Ventas";
                 // Utilizamos la clase SQLServer para ejecutar la consulta y obtener el resultado
-                SQLServer sqlServer = new SQLServer();
-                List<Venta> ventas = await sqlServer.ReaderListAsync<Venta>(query);
+                List<Venta> ventas = await _sqlServer.ReaderListAsync<Venta>(query);
                 return ventas;
             }
             catch (Exception)
@@ -63,8 +66,28 @@ namespace VentasAsync.Model.Commands
                     new SqlParameter("@Total", venta.Total),
                     new SqlParameter("@ClienteId", venta.ClienteID)
                 };
-                SQLServer sqlServer = new SQLServer();
-                int nuevoId = await sqlServer.ScalarAsync<int>(query, parametros);
+                int nuevoId = await _sqlServer.ScalarAsync<int>(query, parametros);
+                return nuevoId;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        private async Task<int> AddVentaTransactionAsync(SqlConnection sqlConnection, SqlTransaction sqlTransaction, Venta venta)
+        {
+            try
+            {
+                string query = "INSERT INTO Ventas (Fecha, Folio, Total, ClienteId) " +
+                               "VALUES (GetDate(), @Folio, @Total, @ClienteId); " +
+                               "SELECT CAST (SCOPE_IDENTITY() AS INT);";
+                SqlParameter[] parametros = new SqlParameter[]
+                {
+                    new SqlParameter("@Folio", venta.Folio),
+                    new SqlParameter("@Total", venta.Total),
+                    new SqlParameter("@ClienteId", venta.ClienteID)
+                };
+                int nuevoId = await _sqlServer.ScalarAsync<int>(sqlConnection, sqlTransaction, query, parametros);
                 return nuevoId;
             }
             catch (Exception)
@@ -90,44 +113,26 @@ namespace VentasAsync.Model.Commands
                 throw;
             }
         }
-        public async Task<Venta> UpdateVentaAsync(int id)
+        public async Task SaveVentaTransactionAsync(Venta venta)
         {
+
+            using SqlConnection sqlConnection = _sqlServer.GetConnection();
+            using SqlTransaction sqlTransaction = await _sqlServer.GetTransaction(sqlConnection);
             try
             {
-                string query = "UPDATE Ventas SET Fecha = @Fecha, Folio = @Folio, Total = @Total, ClienteId = @ClienteId " +
-                               "WHERE Id = @Id";
-                SqlParameter[] parametros = new SqlParameter[]
+                int ventaId = await AddVentaTransactionAsync(sqlConnection, sqlTransaction, venta);
+
+                foreach (var concepto in venta.Conceptos)
                 {
-                    new SqlParameter("@Id", id),
-                    new SqlParameter("@Fecha", "20/06/2025"),
-                    new SqlParameter("@Folio", "5"),
-                    new SqlParameter("@Total", "23.50"),
-                    new SqlParameter("@ClienteId", "3")
-                };
-                SQLServer sqlServer = new SQLServer();
-                await sqlServer.NonQueryAsync(query, parametros);
-                return await GetVentaAsync(id);
+                    VentaDetalleCommands detalleCommands = new VentaDetalleCommands();
+                    await detalleCommands.AddVentaDetalleTransactionAsync(sqlConnection, sqlTransaction, concepto, ventaId);
+                }
+                sqlTransaction.Commit();
             }
             catch (Exception)
             {
-                throw;
-            }
-        }
-        public async Task<Venta> DeleteVentaAsync(int id)
-        {
-            try
-            {
-                string query = "DELETE FROM Ventas WHERE Id = @Id";
-                SqlParameter[] parametros = new SqlParameter[]
-                {
-                    new SqlParameter("@Id", id)
-                };
-                SQLServer sqlServer = new SQLServer();
-                await sqlServer.NonQueryAsync(query, parametros);
-                return null; // Retornamos null ya que el cliente ha sido eliminado
-            }
-            catch (Exception)
-            {
+                sqlTransaction.Rollback();
+
                 throw;
             }
         }

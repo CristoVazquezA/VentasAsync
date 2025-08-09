@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             BtnGuardarVenta = new Button();
+            BtnGuardarVentaTransaction = new Button();
             SuspendLayout();
             // 
             // BtnGuardarVenta
@@ -41,11 +42,22 @@
             BtnGuardarVenta.UseVisualStyleBackColor = true;
             BtnGuardarVenta.Click += BtnGuardarVenta_Click;
             // 
+            // BtnGuardarVentaTransaction
+            // 
+            BtnGuardarVentaTransaction.Location = new Point(70, 119);
+            BtnGuardarVentaTransaction.Name = "BtnGuardarVentaTransaction";
+            BtnGuardarVentaTransaction.Size = new Size(195, 23);
+            BtnGuardarVentaTransaction.TabIndex = 1;
+            BtnGuardarVentaTransaction.Text = "Guardar Venta Transaction";
+            BtnGuardarVentaTransaction.UseVisualStyleBackColor = true;
+            BtnGuardarVentaTransaction.Click += BtnGuardarVentaTransaction_Click;
+            // 
             // FrmVentas
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(BtnGuardarVentaTransaction);
             Controls.Add(BtnGuardarVenta);
             Name = "FrmVentas";
             Text = "FrmVentas";
@@ -55,5 +67,6 @@
         #endregion
 
         private Button BtnGuardarVenta;
+        private Button BtnGuardarVentaTransaction;
     }
 }

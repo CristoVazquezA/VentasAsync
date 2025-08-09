@@ -53,5 +53,31 @@ namespace VentasAsync.Model.Commands
                 throw;
             }
         }
+        public async Task AddVentaDetalleTransactionAsync(SqlConnection sqlConnection, SqlTransaction sqlTransaction, VentaDetalle concepto, int ventaId)
+        {
+            try
+            {
+                string query = "INSERT INTO VentaDetalle " +
+                    "(VentaId, Renglon, ProductoId, Cantidad, ValorUnitario, Descripcion, Importe) " +
+                               "VALUES " +
+                    "(@VentaId, @Renglon, @ProductoId, @Cantidad, @ValorUnitario, @Descripcion, @Importe);";
+                SqlParameter[] parametros = new SqlParameter[]
+                {
+                    new SqlParameter("@VentaId", ventaId),
+                    new SqlParameter("@Renglon", concepto.Renglon),
+                    new SqlParameter("@ProductoId", concepto.ProductoId),
+                    new SqlParameter("@Cantidad", concepto.Cantidad),
+                    new SqlParameter("@ValorUnitario", concepto.ValorUnitario),
+                    new SqlParameter("@Descripcion", concepto.Descripcion),
+                    new SqlParameter("@Importe", concepto.Importe)
+                };
+                SQLServer sqlServer = new SQLServer();
+                await sqlServer.NonQueryAsync(sqlConnection, sqlTransaction, query, parametros);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
